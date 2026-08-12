@@ -1,10 +1,7 @@
-import { StrictMode } from 'react'
-import { createRoot } from 'react-dom/client'
-import './index.css'
-import App from './App.jsx'
-
-createRoot(document.getElementById('root')).render(
-  <StrictMode>
-    <App />
-  </StrictMode>,
-)
+import React,{useEffect,useState} from 'react';import{createRoot}from'react-dom/client';import'./style.css';
+const API=import.meta.env.VITE_API_URL||'http://127.0.0.1:8000';
+function App(){const[code,setCode]=useState('print("Hello"');const[result,setResult]=useState(null);const[history,setHistory]=useState([]);const[status,setStatus]=useState('Checking...');const[loading,setLoading]=useState(false);
+const health=async()=>{try{let r=await fetch(API+'/health');if(!r.ok)throw 0;setStatus('API + MongoDB UP')}catch{setStatus('API unavailable')}};
+const load=async()=>{try{let r=await fetch(API+'/history');if(r.ok)setHistory(await r.json())}catch{}};useEffect(()=>{health();load()},[]);
+const analyze=async()=>{setLoading(true);try{let r=await fetch(API+'/analyze',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({code})});let d=await r.json();if(!r.ok)throw Error(d.detail||'Backend error');setResult(d);load();health()}catch(e){setResult({error:'Unable to analyze code',suggestion:e.message})}finally{setLoading(false)}};
+return <div className="page"><header><div><h1>Intelligent Error Analyzer</h1><p>Python error analysis with MongoDB history</p></div><b className={status.includes('UP')?'up':'down'}>● {status}</b></header><main><section className="card"><h2>Analyze Python Code</h2><textarea value={code} onChange={e=>setCode(e.target.value)} spellCheck="false"/><button onClick={analyze} disabled={loading}>{loading?'Analyzing...':'Analyze Code'}</button>{result&&<div className="result"><h3>Analysis Result</h3><p><b>Error:</b> {result.error}</p><p><b>Suggestion:</b> {result.suggestion}</p>{result.line&&<p><b>Line:</b> {result.line}</p>}</div>}</section><section className="card"><h2>Recent History</h2>{history.length?history.map((x,i)=><div className="item" key={i}><b>{x.error}</b><span>{x.suggestion}</span><small>{new Date(x.timestamp).toLocaleString()}</small></div>):<p>No history yet.</p>}</section></main><footer>FastAPI · MongoDB · Docker · Prometheus · Grafana · Jenkins · Kubernetes · Terraform · Datadog-ready</footer></div>};createRoot(document.getElementById('root')).render(<App/>);
