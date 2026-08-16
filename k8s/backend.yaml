@@ -1,0 +1,40 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend
+  namespace: intelligent-error-analyzer
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: backend
+  template:
+    metadata:
+      labels:
+        app: backend
+    spec:
+      containers:
+        - name: backend
+          image: old-git-repo-backend:latest
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 8000
+          env:
+            - name: MONGO_URL
+              value: mongodb://mongodb:27017
+            - name: MONGO_DB
+              value: error_analyzer
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: backend
+  namespace: intelligent-error-analyzer
+spec:
+  selector:
+    app: backend
+  ports:
+    - port: 8000
+      targetPort: 8000
+  type: ClusterIP

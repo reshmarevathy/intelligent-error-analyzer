@@ -1,0 +1,7 @@
+backend.tar
+frontend.tar
+terraform/.terraform/
+*.tfstate
+*.tfstate.*
+.terraform.tfstate.lock.info
+.env
